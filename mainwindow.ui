@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>980</width>
+    <height>1008</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Syncro</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QWidget" name="verticalLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>300</y>
+      <width>961</width>
+      <height>331</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="layout"/>
+   </widget>
+   <widget class="QLabel" name="label0">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>30</y>
+      <width>480</width>
+      <height>270</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label3">
+    <property name="geometry">
+     <rect>
+      <x>490</x>
+      <y>30</y>
+      <width>480</width>
+      <height>270</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label1">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>630</y>
+      <width>480</width>
+      <height>270</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label2">
+    <property name="geometry">
+     <rect>
+      <x>490</x>
+      <y>630</y>
+      <width>480</width>
+      <height>270</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="previous">
+    <property name="geometry">
+     <rect>
+      <x>200</x>
+      <y>910</y>
+      <width>181</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Previous</string>
+    </property>
+    <property name="shortcut">
+     <string>A</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="next">
+    <property name="geometry">
+     <rect>
+      <x>600</x>
+      <y>910</y>
+      <width>181</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Next</string>
+    </property>
+    <property name="shortcut">
+     <string>D</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="sync">
+    <property name="geometry">
+     <rect>
+      <x>400</x>
+      <y>910</y>
+      <width>181</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Sync!</string>
+    </property>
+    <property name="shortcut">
+     <string>S</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="lidar_previous">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>910</y>
+      <width>181</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Lidar Previous</string>
+    </property>
+    <property name="shortcut">
+     <string>Q</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="lidar_next">
+    <property name="geometry">
+     <rect>
+      <x>790</x>
+      <y>910</y>
+      <width>181</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Lidar Next</string>
+    </property>
+    <property name="shortcut">
+     <string>E</string>
+    </property>
+   </widget>
+   <widget class="QProgressBar" name="progressBar">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>950</y>
+      <width>881</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="value">
+     <number>0</number>
+    </property>
+    <property name="format">
+     <string>%m frames</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>961</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>980</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuSetting">
+    <property name="title">
+     <string>Setting</string>
+    </property>
+    <addaction name="actionOpen"/>
+    <addaction name="actionSync"/>
+    <addaction name="actionNoSync"/>
+   </widget>
+   <addaction name="menuSetting"/>
+  </widget>
+  <action name="actionOpen">
+   <property name="text">
+    <string>Open</string>
+   </property>
+  </action>
+  <action name="actionSync">
+   <property name="text">
+    <string>Have to Sync</string>
+   </property>
+  </action>
+  <action name="actionNoSync">
+   <property name="text">
+    <string>No Sync</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
