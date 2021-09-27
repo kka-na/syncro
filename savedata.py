@@ -1,5 +1,5 @@
 from os import sync
-import cv2
+#import cv2
 import threading
 import numpy as np
 import struct
@@ -101,7 +101,8 @@ class SaveData(QObject) :
     send_lidar = pyqtSignal(object, object) 
     def saveLidar(self) :
         lidar_path = Path(self.lidar_path).glob("*.bin")
-        target_idx = self.lidar_start + self.lidar_sync_count
+        print(self.lidar_sync_count)
+        target_idx = self.lidar_start + (self.lidar_sync_count*self.lidar_interval)
         count = 0
         file_count = 0
         for k in sorted(lidar_path) :

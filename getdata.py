@@ -2,7 +2,6 @@ from os import sync
 import numpy as np
 import struct
 from pathlib import Path
-import cv2
 from open3d import *
 
 import av
@@ -169,30 +168,6 @@ class GetData(QObject) :
                     break 
                 count = count+1
                 i = i+1
-            
-            '''
-            vidcap = cv2.VideoCapture(str(k))
-            success, image = vidcap.read()
-            if find :
-                break
-            while success : 
-                calc = count - cam_start - (self.sync_count*10)
-                if count > cam_last :
-                    break
-                if calc >= 0 and calc % 10 == 0 : 
-                    if cam == 0:
-                        self.send_cam0.emit(image)
-                    elif cam == 1:
-                        self.send_cam1.emit(image)
-                    elif cam == 2:
-                        self.send_cam2.emit(image)
-                    elif cam == 3:
-                        self.send_cam3.emit(image)
-                    find = True
-                    break
-                success, image = vidcap.read()
-                count = count + 1
-            '''
     def extract_frame(self, height, width, input_vid, frame_num) :
         out, _ = (
             ffmpeg
