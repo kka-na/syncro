@@ -1,11 +1,12 @@
 from os import sync
 #import cv2
 import threading
+import time
 import numpy as np
 import struct
 from pathlib import Path
 
-from open3d import *
+import open3d 
 import ffmpeg 
 
 from PyQt5.QtGui import *
@@ -24,21 +25,31 @@ class SaveData(QObject) :
         self.cam1_done = False
         self.cam2_done = False
         self.cam3_done = False
-        self.fps = 2
-        self.lidar_interval = int(10/self.fps)
-        self.cam_interval = int(30/self.fps)
+        self.fps = int()
+        
     
     def setPath(self, path) :
         self.lidar_path = path+"/lidar/ouster/data/" 
+        self.gps_path = path+"/gps/data/"
+        self.imu_path = path+"/imu/data/"
         self.cam0_path = path+"/cam/cam0/data/"
         self.cam1_path = path+"/cam/cam1/data/"
         self.cam2_path = path+"/cam/cam2/data/"
         self.cam3_path = path+"/cam/cam3/data/"
         self.lidar_save_path = path+"/00/pcd/" 
+        self.gps_save_path = path+"/00/gps/"
+        self.imu_save_path = path+"/00/imu/"
         self.cam0_save_path = path+"/00/image/front/"
         self.cam1_save_path = path+"/00/image/left/"
         self.cam2_save_path = path+"/00/image/right/"
         self.cam3_save_path = path+"/00/image/rear/"
+        #set FPS
+        self.lidar_interval = int(10/self.fps)
+        self.cam_interval = int(30/self.fps)
+        self.gps_interval = int(20/self.fps)
+        self.imu_interval = int(100/self.fps)
+        self.time_to_sleep = float(1/self.fps)
+        
     
     send_progress_last = pyqtSignal(int)
     def setSync(self, sync, lidar_sync) :
@@ -61,12 +72,16 @@ class SaveData(QObject) :
     
     def saveThread(self):
         tlidar = threading.Thread(target=self.saveLidar)
+        tgps = threading.Thread(target=self.saveGPS)
+        timu = threading.Thread(target=self.saveIMU)
         tcam0 = threading.Thread(target=self.saveCAM, args=(0,))
         tcam1 = threading.Thread(target=self.saveCAM, args=(1,))
         tcam2 = threading.Thread(target=self.saveCAM, args=(2,))
         tcam3 = threading.Thread(target=self.saveCAM, args=(3,))
         state = threading.Thread(target=self.check_status)
         tlidar.start()
+        tgps.start()
+        timu.start()
         tcam0.start()
         tcam1.start()
         tcam2.start()
@@ -83,11 +98,14 @@ class SaveData(QObject) :
                 mbox.exec_()
                 not_yet = False
     
-    @pyqtSlot(int, int, int, int, int, int, int, int, int, int)
-    def setIndexes(self, lidar_start, lidar_last, cam0_start, cam0_last, cam1_start, cam1_last, cam2_start, cam2_last,cam3_start, cam3_last):
+    @pyqtSlot(int, int, int, int, int, int, int, int, int, int, int, int, int, int)
+    def setIndexes(self, lidar_start, lidar_last, gps_start, gps_last, imu_start, imu_last, cam0_start, cam0_last, cam1_start, cam1_last, cam2_start, cam2_last,cam3_start, cam3_last):
         self.lidar_start = lidar_start
         self.lidar_last = lidar_last
-
+        self.gps_start = gps_start
+        self.gps_last = gps_last
+        self.imu_start = imu_start
+        self.imu_last = imu_last
         self.cam0_start = cam0_start
         self.cam0_last = cam0_last
         self.cam1_start = cam1_start
@@ -128,9 +146,64 @@ class SaveData(QObject) :
                 list_pcd.append([x, y, z])
                 byte = f.read(size_float * 4)
         np_pcd = np.asarray(list_pcd)
-        pcd = open3d.geometry.PointCloud()
-        pcd.points = open3d.utility.Vector3dVector(np_pcd)
+        pcd = open3d.geometry.PointCloud() # open3d.geometry.
+        pcd.points = open3d.utility.Vector3dVector(np_pcd) #open3d.utility.
         return np_pcd, pcd 
+
+    send_gps = pyqtSignal(object)
+    def saveGPS(self) :
+        gps_txt = self.gps_path+"gps.txt"
+        target_idx = self.gps_start + (self.sync_count*self.gps_interval)
+        count = 0
+        file_count = 0 
+        gpsf = open(str(gps_txt), 'r')
+        lines = gpsf.readlines()
+        for line in lines :
+            if count == 0 :
+                save_name = self.gps_save_path+"indexes.txt"
+                f = open(save_name, 'w')
+                f.write(str(line))
+                f.close()
+                self.send_gps.emit(line)
+            if count > self.gps_last or file_count > self.cam_file_count :
+                break
+            if count >= target_idx and (count-self.gps_start)%self.gps_interval==0:
+                save_name = self.gps_save_path+"%06d.txt"%file_count
+                f = open(save_name, 'w')
+                f.write(str(line))
+                f.close()
+                self.send_gps.emit(line)
+                time.sleep(self.time_to_sleep)
+                file_count = file_count + 1
+            count = count + 1
+
+    send_imu = pyqtSignal(object)
+    def saveIMU(self) :
+        imu_txt = self.imu_path+"imu.txt"
+        target_idx = self.imu_start + (self.sync_count*self.imu_interval)
+        count = 0
+        file_count = 0 
+        imuf = open(str(imu_txt), 'r')
+        lines = imuf.readlines()
+        for line in lines :
+            if count == 0 :
+                save_name = self.imu_save_path+"indexes.txt"
+                f = open(save_name, 'w')
+                f.write(str(line))
+                f.close()
+                self.send_imu.emit(line)
+            if count > self.imu_last or file_count > self.cam_file_count :
+                break
+            if count >= target_idx and (count-self.imu_start)%self.imu_interval==0:
+                save_name = self.imu_save_path+"%06d.txt"%file_count
+                f = open(save_name, 'w')
+                f.write(str(line))
+                f.close()
+                self.send_imu.emit(line)
+                time.sleep(self.time_to_sleep)
+                file_count = file_count + 1
+            count = count + 1
+
 
     send_cam0 = pyqtSignal(object)
     send_cam1 = pyqtSignal(object)
@@ -245,7 +318,7 @@ class SaveData(QObject) :
             ffmpeg
             .input(str(input_vid))
             .filter_('select', 'between(n,{},{})'.format(start_num-start_idx, frame_num))
-            .filter_('fps', fps=2 )
+            .filter_('fps', fps=self.fps )
             .output(str(output_name)+"%06d"+str(pos)+".jpg", start_number=int(file_count), vsync=0)
             .run()
         )

@@ -1,8 +1,10 @@
 from os import sync
+import os
+from sys import version
 import numpy as np
 import struct
 from pathlib import Path
-from open3d import *
+import open3d
 
 import av
 import ffmpeg
@@ -17,18 +19,24 @@ class GetData(QObject) :
         super(GetData, self).__init__()
         self.sync_count = 0
         self.lidar_sync_count = 0
-        self.fps = 2
-        self.lidar_interval = int(10/self.fps)
-        self.cam_interval = int(30/self.fps)
-
-    
+        self.fps = int()
+        
     def setPath(self, path) :
         self.lidar_path = path+"/lidar/ouster/data/" 
+        self.gps_path = path+"/gps/data/"
+        self.imu_path = path+"/imu/data/"
         self.cam0_path = path+"/cam/cam0/data/"
         self.cam1_path = path+"/cam/cam1/data/"
         self.cam2_path = path+"/cam/cam2/data/"
         self.cam3_path = path+"/cam/cam3/data/"
+        #set FPS
+        self.lidar_interval = int(10/self.fps)
+        self.gps_interval = int(20/self.fps)
+        self.imu_interval = int(100/self.fps)
+        self.cam_interval = int(30/self.fps)
 
+
+        
     def getSync(self) :
         self.sendSync()
 
@@ -36,11 +44,14 @@ class GetData(QObject) :
     def sendSync(self) :
         self.send_sync.emit(self.sync_count, self.lidar_sync_count)
 
-    @pyqtSlot(int, int, int, int, int, int, int, int, int, int)
-    def setIndexes(self, lidar_start, lidar_last, cam0_start, cam0_last, cam1_start, cam1_last, cam2_start, cam2_last,cam3_start, cam3_last):
+    @pyqtSlot(int, int, int, int, int, int, int, int, int, int, int, int, int, int)
+    def setIndexes(self, lidar_start, lidar_last, gps_start, gps_last, imu_start, imu_last, cam0_start, cam0_last, cam1_start, cam1_last, cam2_start, cam2_last,cam3_start, cam3_last):
         self.lidar_start = lidar_start
         self.lidar_last = lidar_last
-
+        self.gps_start = gps_start
+        self.gps_last = gps_last
+        self.imu_start = imu_start
+        self.imu_last = imu_last
         self.cam0_start = cam0_start
         self.cam0_last = cam0_last
         self.cam1_start = cam1_start
@@ -81,6 +92,8 @@ class GetData(QObject) :
         self.sendLidarNP()
 
     def sendDatum(self) :
+        self.sendGPS()
+        self.sendIMU()
         self.sendCam(0)
         self.sendCam(1)
         self.sendCam(2)
@@ -110,9 +123,27 @@ class GetData(QObject) :
                 byte = f.read(size_float * 4)
         np_pcd = np.asarray(list_pcd)
         np_pcd2 = np.asarray(list_pcd2)
-        pcd = open3d.geometry.PointCloud()
-        pcd.points = open3d.utility.Vector3dVector(np_pcd)
+        pcd = open3d.geometry.PointCloud() #open3d.geometry
+        pcd.points = open3d.utility.Vector3dVector(np_pcd) #open3d.utility.
         return np_pcd, np_pcd2
+
+    send_gps = pyqtSignal(object)
+    def sendGPS(self) :
+        gps_txt = Path(self.gps_path+"gps.txt")
+        count = self.gps_start + self.sync_count * self.gps_interval
+        if count > self.gps_last :
+            count = self.gps_start + (self.sync_count - 1)
+        gps_line = gps_txt.read_text().split('\n')[count] 
+        self.send_gps.emit(gps_line)
+
+    send_imu = pyqtSignal(object)
+    def sendIMU(self) :
+        imu_txt = Path(self.imu_path+"imu.txt")
+        count = self.imu_start + self.sync_count * self.imu_interval
+        if count > self.imu_last :
+            count = self.imu_start + (self.sync_count - 1)
+        imu_line = imu_txt.read_text().split('\n')[count] 
+        self.send_imu.emit(imu_line)
 
     send_cam0 = pyqtSignal(object)
     send_cam1 = pyqtSignal(object)
@@ -122,19 +153,19 @@ class GetData(QObject) :
         cam_start = 0
         cam_last = 0
         if cam == 0 :
-            cam_path = Path(self.cam0_path).glob("*mp4")
+            cam_path = Path(self.cam0_path).glob("*.mp4")
             cam_start = self.cam0_start
             cam_last = self.cam0_last
         elif cam == 1 :
-            cam_path = Path(self.cam1_path).glob("*mp4")
+            cam_path = Path(self.cam1_path).glob("*.mp4")
             cam_start = self.cam1_start
             cam_last = self.cam1_last
         elif cam == 2 :
-            cam_path = Path(self.cam2_path).glob("*mp4")
+            cam_path = Path(self.cam2_path).glob("*.mp4")
             cam_start = self.cam2_start
             cam_last = self.cam2_last
         elif cam == 3 :
-            cam_path = Path(self.cam3_path).glob("*mp4")
+            cam_path = Path(self.cam3_path).glob("*.mp4")
             cam_start = self.cam3_start
             cam_last = self.cam3_last
         

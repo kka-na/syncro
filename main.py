@@ -26,13 +26,15 @@ class WindowClass(QMainWindow, form_class) :
 		self.getdata = getdata.GetData()
 		self.savedata = savedata.SaveData()
 		self.setConnect()
-
+		
 	def setConnect(self) :
 		self.actionOpen.triggered.connect(self.setDir)
 		self.actionSync.triggered.connect(self.getidx.sendSync)
 		self.actionNoSync.triggered.connect(self.getidx.sendNoSync)
 		self.getidx.send_indexes.connect(self.getdata.setIndexes)
 		self.getdata.send_lidar.connect(self.setLiDAR)
+		self.getdata.send_gps.connect(self.setGPS)
+		self.getdata.send_imu.connect(self.setIMU)
 		self.getdata.send_cam0.connect(self.setCam0)
 		self.getdata.send_cam1.connect(self.setCam1)
 		self.getdata.send_cam2.connect(self.setCam2)
@@ -46,6 +48,8 @@ class WindowClass(QMainWindow, form_class) :
 		self.getdata.send_sync.connect(self.savedata.setSync)
 		self.getidx.send_indexes.connect(self.savedata.setIndexes) 
 		self.savedata.send_lidar.connect(self.setLiDAR)
+		self.savedata.send_gps.connect(self.setGPS)
+		self.savedata.send_imu.connect(self.setIMU)
 		self.savedata.send_cam0.connect(self.setCam0)
 		self.savedata.send_cam1.connect(self.setCam1)
 		self.savedata.send_cam2.connect(self.setCam2)
@@ -56,7 +60,8 @@ class WindowClass(QMainWindow, form_class) :
 	
 	def setDir(self) :
 		self.setVTK()
-		path = QFileDialog.getExistingDirectory(None, 'Select Directory of top of datasets',QDir.currentPath(), QFileDialog.ShowDirsOnly)
+		self.setFPS()
+		path = QFileDialog.getExistingDirectory(None, 'Select Directory of top of datasets',"/media/kana/cde7d52f-f61e-4a99-b164-5108d62c3ceb/210930AI_night", QFileDialog.ShowDirsOnly)
 		self.label.setText(str(path))
 		self.dir = str(path) #"/home/kana/Documents/ts_project/raw_data" #path
 		self.createDir()
@@ -68,6 +73,8 @@ class WindowClass(QMainWindow, form_class) :
 		make_new = False
 		top = str(str(self.dir)+"/00")                                                                                                                                                       
 		pcd = str(str(self.dir)+"/00/pcd") 
+		gps = str(str(self.dir)+"/00/gps")
+		imu = str(str(self.dir)+"/00/imu")
 		image = str(str(self.dir)+"/00/image")
 		front = str(str(self.dir)+"/00/image/front")
 		left = str(str(self.dir)+"/00/image/left")
@@ -90,14 +97,14 @@ class WindowClass(QMainWindow, form_class) :
 			else :
 				sys.exit()
 		self.makeDir(pcd, make_new)
+		self.makeDir(gps, make_new)
+		self.makeDir(imu, make_new)
 		self.makeDir(image, make_new)
 		self.makeDir(front, make_new)
 		self.makeDir(left, make_new)
 		self.makeDir(right, make_new)
 		self.makeDir(rear, make_new)
 
-
-		
 	def makeDir(self, path, perm) :
 		if not os.path.exists(path) :
 			os.mkdir(path)
@@ -109,6 +116,12 @@ class WindowClass(QMainWindow, form_class) :
 				print("There is No Permission to Create Top Directory")
 				sys.exit()
 
+	def setFPS(self) :
+		self.fps = self.spinBox.value()
+		print(self.fps)
+		self.getdata.fps = self.fps
+		self.savedata.fps = self.fps
+		
 	def setVTK(self):
 		self.vtkWidget = QVTKRenderWindowInteractor(self)
 		self.layout.addWidget(self.vtkWidget)
@@ -161,6 +174,19 @@ class WindowClass(QMainWindow, form_class) :
 		qimage = qimage.scaled(self.label0.size(), Qt.KeepAspectRatio)
 		return qimage
 
+	@pyqtSlot(object)
+	def setIMU(self, object):
+		self.label5.setText(str(object))
+		self.label5.show()
+		QApplication.processEvents()
+
+	@pyqtSlot(object)
+	def setGPS(self, object):
+		self.label4.setText(str(object))
+		self.label4.show()
+		QApplication.processEvents()
+
+		
 	@pyqtSlot(object)
 	def setCam0(self, object):
 		self.label0.setPixmap(QPixmap.fromImage(self.conv2Qimg(object)))
