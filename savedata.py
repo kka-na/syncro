@@ -145,12 +145,13 @@ class SaveData(QObject) :
             while byte:
                 x, y, z, intensity = struct.unpack("ffff", byte)
                 list_pcd.append([x, y, z])
-                list_pcd2.append([x,y,z,intensity])
+                list_pcd2.append([intensity, 0.0, 0.0])
                 byte = f.read(size_float * 4)
         np_pcd = np.asarray(list_pcd)
         np_pcd2 = np.asarray(list_pcd2)
         pcd = open3d.geometry.PointCloud() # open3d.geometry.
-        pcd.points = open3d.utility.Vector3dVector(np_pcd2) #open3d.utility.
+        pcd.points = open3d.utility.Vector3dVector(np_pcd) #open3d.utility.
+        pcd.colors = open3d.utility.Vector3dVector(np_pcd2)
         return np_pcd, pcd 
 
     send_gps = pyqtSignal(object)
