@@ -9,3 +9,7 @@ It helps you to synchronize logged point cloud data & cameras .
 If not then select "No SYNC". 
 4. Use below button prev, next, lidar prev, lidar next and check the Synchronization. 
 5. If all data was syncronized, then press "SYNC!" button and save the datum.
+
+## See this video for test running.
+
+[![Driving Data Syncronization Helper Testing Video](http://img.youtube.com/vi/T1rNekVmjKs/0.jpg)](https://youtu.be/T1rNekVmjKs) 

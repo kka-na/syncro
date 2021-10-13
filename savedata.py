@@ -139,15 +139,18 @@ class SaveData(QObject) :
     def convert_bin_to_pcd(self, binFilePath):
         size_float = 4
         list_pcd = []
+        list_pcd2 = []
         with open(binFilePath, "rb") as f:
             byte = f.read(size_float * 4)
             while byte:
                 x, y, z, intensity = struct.unpack("ffff", byte)
                 list_pcd.append([x, y, z])
+                list_pcd2.append([x,y,z,intensity])
                 byte = f.read(size_float * 4)
         np_pcd = np.asarray(list_pcd)
+        np_pcd2 = np.asarray(list_pcd2)
         pcd = open3d.geometry.PointCloud() # open3d.geometry.
-        pcd.points = open3d.utility.Vector3dVector(np_pcd) #open3d.utility.
+        pcd.points = open3d.utility.Vector3dVector(np_pcd2) #open3d.utility.
         return np_pcd, pcd 
 
     send_gps = pyqtSignal(object)
