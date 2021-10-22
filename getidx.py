@@ -40,7 +40,6 @@ class GetIdx(QObject) :
         cam2_last, _ = self.getSimilarIdx(this_last_time,self.cam2_tspath, 0.035, 1)
         cam3_start, _ = self.getSimilarIdx(this_base_time, self.cam3_tspath, 0.035, 0)
         cam3_last, _ = self.getSimilarIdx(this_last_time,self.cam3_tspath, 0.035, 1)
-        print(cam3_start, cam3_last)
         self.send_indexes.emit(self.lidar_start_idx, self.lidar_last_idx, gps_start, gps_last, imu_start, imu_last, cam0_start, cam0_last, cam1_start, cam1_last, cam2_start, cam2_last,cam3_start, cam3_last)
     
     def sendZeros(self):
@@ -183,8 +182,6 @@ class GetIdx(QObject) :
                     now = text_idx
                 elif abs(sensor_time-base_time) >= 10 :
                     break
-                else :
-                    pass
                 text_idx = text_idx+1
         elif type == 1 :
             for line in ts_texts :
@@ -197,8 +194,6 @@ class GetIdx(QObject) :
                     min = abs(sensor_time-base_time)
                     temp = sensor_time
                     now = text_idx
-                else :
-                    pass
                 text_idx = text_idx+1
         else :
             print("Enter the type code ")

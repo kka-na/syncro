@@ -50,20 +50,23 @@ class WindowClass(QMainWindow, form_class) :
 		self.savedata.send_lidar.connect(self.setLiDAR)
 		self.savedata.send_gps.connect(self.setGPS)
 		self.savedata.send_imu.connect(self.setIMU)
+		'''
+		if you want check saved camera image, please turn on below code 
+		but it will really slow
 		self.savedata.send_cam0.connect(self.setCam0)
 		self.savedata.send_cam1.connect(self.setCam1)
 		self.savedata.send_cam2.connect(self.setCam2)
 		self.savedata.send_cam3.connect(self.setCam3)
-
+		'''
 		self.savedata.send_progress_last.connect(self.setProgress)
 		self.savedata.send_progress.connect(self.handleProgress) 
 	
 	def setDir(self) :
 		self.setVTK()
 		self.setFPS()
-		path = QFileDialog.getExistingDirectory(None, 'Select Directory of top of datasets',"/media/kana/cde7d52f-f61e-4a99-b164-5108d62c3ceb/210930AI_night", QFileDialog.ShowDirsOnly)
+		path = QFileDialog.getExistingDirectory(None, 'Select Directory of top of datasets',QDir.currentPath(), QFileDialog.ShowDirsOnly)
 		self.label.setText(str(path))
-		self.dir = str(path) #"/home/kana/Documents/ts_project/raw_data" #path
+		self.dir = str(path) 
 		self.createDir()
 		self.getdata.setPath(self.dir)
 		self.savedata.setPath(self.dir)

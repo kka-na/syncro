@@ -244,9 +244,6 @@ class SaveData(QObject) :
             save_path = self.cam3_save_path
             pos="_rear"
 
-        #video setting 
-        height = 1080
-        width = 1920
         pos = ""
         saved = False
         count = 0
